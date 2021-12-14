@@ -71,7 +71,7 @@ public class AdapterMagic extends RecyclerView.Adapter<AdapterMagic.Holder> {
     }
 
     public void randomMagic() {
-        for (int i = 0; i <= list.size(); i++) {
+        for (int i = 0; i < list.size(); i++) {
             list.get(i).setOpen(false);
             int j = new Random().nextInt(list.size()-1);
             int k = new Random().nextInt(list.size()-1);
