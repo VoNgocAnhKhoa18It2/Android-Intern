@@ -40,6 +40,8 @@ public class AdapterMagic extends RecyclerView.Adapter<AdapterMagic.Holder> {
         Magic magic = list.get(position);
         if (magic.isOpen()) {
             Picasso.get().load(magic.getUrlMagic()).into(holder.imgMagic);
+        } else {
+            holder.imgMagic.setImageResource(R.drawable.bb);
         }
         holder.imgMagic.setOnClickListener(new View.OnClickListener() {
             @Override
