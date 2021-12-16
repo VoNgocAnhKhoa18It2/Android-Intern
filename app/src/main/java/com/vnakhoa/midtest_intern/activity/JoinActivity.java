@@ -157,7 +157,7 @@ public class JoinActivity extends AppCompatActivity {
         dialog.setMessage("Processing. Please wait...");
         dialog.show();
         Service service = Server.getInstance().create(Service.class);
-        service.join(id,password,email,convertDate(birth)).enqueue(new Callback<ResponseBody>() {
+        service.join(id,password,email,birth).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
