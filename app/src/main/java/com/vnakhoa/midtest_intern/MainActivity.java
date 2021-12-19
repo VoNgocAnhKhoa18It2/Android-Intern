@@ -33,6 +33,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Random;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -41,10 +43,8 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView listMagic;
     private Button btnRandom,btnBack;
-    ArrayList<Magic> magicArrayList;
-    AdapterMagic adapterMagic;
+    ArrayList<String> magicArrayList;
     RelativeLayout list_item;
     private int xDelta;
     private int yDelta;
@@ -72,7 +72,17 @@ public class MainActivity extends AppCompatActivity {
         btnRandom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adapterMagic.randomMagic();
+                list_item.removeAllViews();
+                for (int i = 0; i < magicArrayList.size(); i++) {
+                    int j = new Random().nextInt(magicArrayList.size()-1);
+                    int k = new Random().nextInt(magicArrayList.size()-1);
+                    Collections.swap(magicArrayList, j, k);
+                }
+                for (int i = 0; i < magicArrayList.size(); i++) {
+                    String url = magicArrayList.get(i);
+                    ImageView img = createImg(url,i);
+                    list_item.addView(img);
+                }
             }
         });
     }
@@ -81,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     private void addControls() {
         btnBack = findViewById(R.id.btnBack);
         btnRandom = findViewById(R.id.btnRandom);
-        listMagic = findViewById(R.id.listMagic);
         list_item = findViewById(R.id.list_item);
 
         magicArrayList = new ArrayList<>();
@@ -105,62 +114,9 @@ public class MainActivity extends AppCompatActivity {
                         JSONArray jsonArray = object.getJSONArray("data");
                         for (int i = 0; i < jsonArray.length(); i++) {
                             String url = Server.URL+"assets/magic/"+jsonArray.get(i).toString();
-                            Magic magic = new Magic(url,false);
-                            magicArrayList.add(magic);
-                            ImageView img = new ImageView(MainActivity.this);
-                            img.setImageResource(R.drawable.bb);
-                            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(dpToPx(70,MainActivity.this),dpToPx(140,MainActivity.this));
-                            img.setLayoutParams(layoutParams);
-                            img.setOnTouchListener(new View.OnTouchListener() {
-                                private int CLICK_ACTION_THRESHOLD = 1;
-                                private boolean checkMove = true;
-                                @Override
-                                public boolean onTouch(View view, MotionEvent motionEvent) {
-                                    final int x = (int) motionEvent.getRawX();
-                                    final int y = (int) motionEvent.getRawY();
-
-                                    switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-
-                                        case MotionEvent.ACTION_DOWN:
-                                            checkMove = false;
-                                            RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams)
-                                                    view.getLayoutParams();
-
-                                            xDelta = x - lParams.leftMargin;
-                                            yDelta = y - lParams.topMargin;
-                                            break;
-
-                                        case MotionEvent.ACTION_UP:
-
-                                            if (!checkMove) {
-                                                Picasso.get().load(url).into(img);
-                                                checkMove = false;
-                                            }
-
-                                            break;
-
-                                        case MotionEvent.ACTION_MOVE:
-                                            checkMove = true;
-                                            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view
-                                                    .getLayoutParams();
-                                            layoutParams.leftMargin = x - xDelta;
-                                            layoutParams.topMargin = y - yDelta;
-                                            layoutParams.rightMargin = 0;
-                                            layoutParams.bottomMargin = 0;
-                                            view.setLayoutParams(layoutParams);
-                                            break;
-                                    }
-
-                                    list_item.invalidate();
-                                    return true;
-                                }
-                            });
-
-                            img.setX(0);
-                            img.setY(0);
-                            img.setZ(i);
+                            magicArrayList.add(url);
+                            ImageView img = createImg(url,i);
                             list_item.addView(img);
-
                         }
 
                     } else {
@@ -179,6 +135,62 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public ImageView createImg(String url,int i) {
+        ImageView img = new ImageView(MainActivity.this);
+        img.setImageResource(R.drawable.bb);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(dpToPx(70,MainActivity.this),dpToPx(140,MainActivity.this));
+        img.setLayoutParams(layoutParams);
+        img.setOnTouchListener(new View.OnTouchListener() {
+            private int CLICK_ACTION_THRESHOLD = 1;
+            private boolean checkMove = true;
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                final int x = (int) motionEvent.getRawX();
+                final int y = (int) motionEvent.getRawY();
+
+                switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+                    case MotionEvent.ACTION_DOWN:
+                        checkMove = false;
+                        RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams)
+                                view.getLayoutParams();
+
+                        xDelta = x - lParams.leftMargin;
+                        yDelta = y - lParams.topMargin;
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+
+                        if (!checkMove) {
+                            Picasso.get().load(url).into(img);
+                            checkMove = false;
+                        }
+
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+                        checkMove = true;
+                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view
+                                .getLayoutParams();
+                        layoutParams.leftMargin = x - xDelta;
+                        layoutParams.topMargin = y - yDelta;
+                        layoutParams.rightMargin = 0;
+                        layoutParams.bottomMargin = 0;
+                        view.setLayoutParams(layoutParams);
+                        break;
+                }
+
+                list_item.invalidate();
+                return true;
+            }
+        });
+        img.setX(0);
+        img.setY(0);
+        img.setZ(i);
+        return img;
     }
 
     public static int dpToPx(float dp, Context context) {
